@@ -10,6 +10,7 @@ namespace SM\Setting\Repositories;
 use Exception;
 use Magento\Config\Model\Config\Loader;
 use Magento\Config\Model\ResourceModel\Config;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
@@ -50,6 +51,11 @@ class SettingManagement extends ServiceAbstract
      */
     protected $customSaleHelper;
     /**
+     * @var \Magento\Framework\App\Config\ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
      * @var \SM\Product\Helper\ProductHelper
      */
     private $productHelper;
@@ -66,16 +72,17 @@ class SettingManagement extends ServiceAbstract
     /**
      * SettingManagement constructor.
      *
-     * @param \Magento\Framework\App\RequestInterface    $requestInterface
-     * @param \SM\XRetail\Helper\DataConfig              $dataConfig
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Framework\ObjectManagerInterface  $objectManager
-     * @param \Magento\Config\Model\Config\Loader        $loader
-     * @param \Magento\Config\Model\ResourceModel\Config $config
-     * @param \SM\CustomSale\Helper\Data                 $customSaleHelper
-     * @param \SM\Integrate\Helper\Data                  $integrateHelperData
-     * @param \SM\Integrate\Model\GCIntegrateManagement  $GCIntegrateManagement
-     * @param \SM\Product\Helper\ProductHelper           $productHelper
+     * @param \Magento\Framework\App\RequestInterface            $requestInterface
+     * @param \SM\XRetail\Helper\DataConfig                      $dataConfig
+     * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
+     * @param \Magento\Framework\ObjectManagerInterface          $objectManager
+     * @param \Magento\Config\Model\Config\Loader                $loader
+     * @param \Magento\Config\Model\ResourceModel\Config         $config
+     * @param \SM\CustomSale\Helper\Data                         $customSaleHelper
+     * @param \SM\Integrate\Helper\Data                          $integrateHelperData
+     * @param \SM\Integrate\Model\GCIntegrateManagement          $GCIntegrateManagement
+     * @param \SM\Product\Helper\ProductHelper                   $productHelper
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      */
     public function __construct(
         RequestInterface $requestInterface,
@@ -87,8 +94,8 @@ class SettingManagement extends ServiceAbstract
         Data $customSaleHelper,
         IntegrateHelper $integrateHelperData,
         GCIntegrateManagement $GCIntegrateManagement,
-        ProductHelper $productHelper
-
+        ProductHelper $productHelper,
+        ScopeConfigInterface $scopeConfig
     ) {
         $this->configLoader     = $loader;
         $this->configResource   = $config;
@@ -98,6 +105,7 @@ class SettingManagement extends ServiceAbstract
         $this->gcIntegrateManagement = $GCIntegrateManagement;
         $this->productHelper    = $productHelper;
         $this->integrateHelperData = $integrateHelperData;
+        $this->scopeConfig = $scopeConfig;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
     }
 
@@ -157,44 +165,36 @@ class SettingManagement extends ServiceAbstract
     public function getRetailSettingData()
     {
         $searchCriteria = $this->getSearchCriteria();
-        if (!$searchCriteria->getData('group')) {
-            throw new Exception(__("Please define setting group"));
-        } else {
-            $group = $searchCriteria->getData('group');
-        }
 
-        $_gs     = explode(",", $group);
         $configs = [];
         if ($searchCriteria->getData('currentPage') > 1) {
         } else {
-            foreach ($_gs as $g) {
-                $config     = [];
-                $configData = $this->configLoader->getConfigByPath('xretail/' . $g, 'default', 0);
-                foreach ($configData as $configDatum) {
-                    $config[$configDatum['path']] = $this->convertValue($configDatum['value']);
-                }
-                if ($g === 'pos') {
-                    $config["productAttributes"] = $this->productHelper->getProductAttributes();
-                    if ($this->integrateHelperData->isAHWGiftCardxist()
-                        && $this->integrateHelperData->isIntegrateGC()) {
-                        $config['list_code_pools'] = $this->gcIntegrateManagement->getGCCodePool();
-                    }
-                }
-
-                $config["xretail/pos/integrate_wh"] = "none";
-
-                if (!!$this->integrateHelperData->isMagentoInventory()) {
-                    $config["xretail/pos/integrate_wh"] = "magento_inventory";
-                }
-
-                if (!!$this->integrateHelperData->isIntegrateWH()) {
-                    $config["xretail/pos/integrate_wh"] = "bms";
-                }
-
-                $retailConfig = new RetailConfig();
-                $retailConfig->setData('key', $g)->setData('value', $config);
-                $configs[] = $retailConfig;
+            $config     = [];
+            $configData = $this->scopeConfig->getValue("xretail/pos", "default");
+            foreach ($configData as $path => $value) {
+                $path = 'xretail/pos/' . $path;
+                $config[$path] = $this->convertValue($value);
             }
+
+            $config["productAttributes"] = $this->productHelper->getProductAttributes();
+            if ($this->integrateHelperData->isAHWGiftCardxist()
+                && $this->integrateHelperData->isIntegrateGC()) {
+                $config['list_code_pools'] = $this->gcIntegrateManagement->getGCCodePool();
+            }
+
+            $config["xretail/pos/integrate_wh"] = "none";
+
+            if (!!$this->integrateHelperData->isMagentoInventory()) {
+                $config["xretail/pos/integrate_wh"] = "magento_inventory";
+            }
+
+            if (!!$this->integrateHelperData->isIntegrateWH()) {
+                $config["xretail/pos/integrate_wh"] = "bms";
+            }
+
+            $retailConfig = new RetailConfig();
+            $retailConfig->setData('key', 'pos')->setData('value', $config);
+            $configs[] = $retailConfig;
         }
 
         return $this->getSearchResult()->setItems($configs)->getOutput();
@@ -215,7 +215,7 @@ class SettingManagement extends ServiceAbstract
             }
             $this->configResource->saveConfig($key, $value, 'default', 0);
         }
-        //FIX XRT :549 update custom sales tax class
+        //FIX XRT :549 updateRefundToGCProduct custom sales tax class
         if (isset($configData['xretail/pos/custom_sale_tax_class'])) {
             $customerSales = $this->customSaleHelper->getCustomSaleProduct();
             $customerSales->setStoreId(0);
@@ -272,11 +272,13 @@ class SettingManagement extends ServiceAbstract
 
     protected function convertValue($value)
     {
-        $result = json_decode($value);
-        if (json_last_error()) {
-            $result = $value;
+        if (!is_array($value)) {
+            $result = json_decode($value);
+            if (json_last_error()) {
+                $result = $value;
+            }
+            return $result;
         }
-
-        return $result;
+        return $value;
     }
 }
