@@ -10,7 +10,9 @@ namespace SM\Setting\Repositories;
 use Exception;
 use Magento\Config\Model\Config\Loader;
 use Magento\Config\Model\ResourceModel\Config;
+use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\ObjectManagerInterface;
@@ -54,6 +56,14 @@ class SettingManagement extends ServiceAbstract
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     protected $scopeConfig;
+    /**
+     * @var \Magento\Framework\App\Config\Storage\WriterInterface
+     */
+    protected $configWriter;
+    /**
+     * @var \Magento\Framework\App\Cache\TypeListInterface
+     */
+    protected $cacheTypeList;
 
     /**
      * @var \SM\Product\Helper\ProductHelper
@@ -72,17 +82,19 @@ class SettingManagement extends ServiceAbstract
     /**
      * SettingManagement constructor.
      *
-     * @param \Magento\Framework\App\RequestInterface            $requestInterface
-     * @param \SM\XRetail\Helper\DataConfig                      $dataConfig
-     * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
-     * @param \Magento\Framework\ObjectManagerInterface          $objectManager
-     * @param \Magento\Config\Model\Config\Loader                $loader
-     * @param \Magento\Config\Model\ResourceModel\Config         $config
-     * @param \SM\CustomSale\Helper\Data                         $customSaleHelper
-     * @param \SM\Integrate\Helper\Data                          $integrateHelperData
-     * @param \SM\Integrate\Model\GCIntegrateManagement          $GCIntegrateManagement
-     * @param \SM\Product\Helper\ProductHelper                   $productHelper
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Magento\Framework\App\RequestInterface               $requestInterface
+     * @param \SM\XRetail\Helper\DataConfig                         $dataConfig
+     * @param \Magento\Store\Model\StoreManagerInterface            $storeManager
+     * @param \Magento\Framework\ObjectManagerInterface             $objectManager
+     * @param \Magento\Config\Model\Config\Loader                   $loader
+     * @param \Magento\Config\Model\ResourceModel\Config            $config
+     * @param \SM\CustomSale\Helper\Data                            $customSaleHelper
+     * @param \SM\Integrate\Helper\Data                             $integrateHelperData
+     * @param \SM\Integrate\Model\GCIntegrateManagement             $GCIntegrateManagement
+     * @param \SM\Product\Helper\ProductHelper                      $productHelper
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface    $scopeConfig
+     * @param \Magento\Framework\App\Config\Storage\WriterInterface $configWriter
+     * @param \Magento\Framework\App\Cache\TypeListInterface        $cacheTypeList
      */
     public function __construct(
         RequestInterface $requestInterface,
@@ -95,17 +107,21 @@ class SettingManagement extends ServiceAbstract
         IntegrateHelper $integrateHelperData,
         GCIntegrateManagement $GCIntegrateManagement,
         ProductHelper $productHelper,
-        ScopeConfigInterface $scopeConfig
+        ScopeConfigInterface $scopeConfig,
+        WriterInterface $configWriter,
+        TypeListInterface $cacheTypeList
     ) {
-        $this->configLoader     = $loader;
-        $this->configResource   = $config;
-        $this->objectManager    = $objectManager;
-        $this->customSaleHelper = $customSaleHelper;
-        $this->integrateHelperData = $integrateHelperData;
+        $this->configLoader          = $loader;
+        $this->configResource        = $config;
+        $this->objectManager         = $objectManager;
+        $this->customSaleHelper      = $customSaleHelper;
+        $this->integrateHelperData   = $integrateHelperData;
         $this->gcIntegrateManagement = $GCIntegrateManagement;
-        $this->productHelper    = $productHelper;
-        $this->integrateHelperData = $integrateHelperData;
-        $this->scopeConfig = $scopeConfig;
+        $this->productHelper         = $productHelper;
+        $this->integrateHelperData   = $integrateHelperData;
+        $this->scopeConfig           = $scopeConfig;
+        $this->configWriter          = $configWriter;
+        $this->cacheTypeList         = $cacheTypeList;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
     }
 
@@ -170,10 +186,9 @@ class SettingManagement extends ServiceAbstract
         if ($searchCriteria->getData('currentPage') > 1) {
         } else {
             $config     = [];
-            $configData = $this->scopeConfig->getValue("xretail/pos", "default");
-            foreach ($configData as $path => $value) {
-                $path = 'xretail/pos/' . $path;
-                $config[$path] = $this->convertValue($value);
+            $configData = $this->configLoader->getConfigByPath('xretail/pos', 'default', 0);
+            foreach ($configData as $configDatum) {
+                $config[$configDatum['path']] = $this->convertValue($configDatum['value']);
             }
 
             $config["productAttributes"] = $this->productHelper->getProductAttributes();
@@ -213,7 +228,7 @@ class SettingManagement extends ServiceAbstract
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            $this->configResource->saveConfig($key, $value, 'default', 0);
+            $this->configWriter->save($key, $value, 'default', 0);
         }
         //FIX XRT :549 updateRefundToGCProduct custom sales tax class
         if (isset($configData['xretail/pos/custom_sale_tax_class'])) {
@@ -225,22 +240,25 @@ class SettingManagement extends ServiceAbstract
         if (isset($configData['xretail/pos/integrate_gc'])
             && $this->integrateHelperData->isAHWGiftCardxist()) {
             if ($configData['xretail/pos/integrate_gc'] == "aheadWorks") {
-                $data                = [
-                    'is_default_codepool_pattern' => $configData['xretail/pos/is_use_default_codepool_pattern'],
-                    'code_pool'                   => $configData['xretail/pos/refund_gc_codepool'],
-                ];
+                $data = [];
+                if (isset($configData['xretail/pos/is_use_default_codepool_pattern'])) {
+                    $data['is_default_codepool_pattern'] = $configData['xretail/pos/is_use_default_codepool_pattern'];
+                }
+                if (isset($configData['xretail/pos/refund_gc_codepool'])) {
+                    $data['code_pool'] = $configData['xretail/pos/refund_gc_codepool'];
+                }
                 $this->integrateHelperData->getGcIntegrateManagement()->updateRefundToGCProduct($data);
             }
         }
         // check saving reward point integration info
         if (isset($configData['xretail/pos/integrate_rp'])) {
             if ($configData['xretail/pos/integrate_rp'] === 'aheadWorks'
-                && !$this->integrateHelperData->isAHWRewardPoints()) {
+                && !$this->integrateHelperData->isAHWRewardPointsExist()) {
                 throw new LocalizedException(
                     __('Module Aheadworks_RewardPoints is not found!')
                 );
             } elseif ($configData['xretail/pos/integrate_rp'] === 'mage2_ee'
-                     && !$this->integrateHelperData->isRewardPointMagento2EE()) {
+                      && !$this->integrateHelperData->isRewardPointMagento2EEExist()) {
                 throw new LocalizedException(
                     __('Module Magento_Reward is not found!')
                 );
@@ -249,7 +267,7 @@ class SettingManagement extends ServiceAbstract
         //check saving gift card integration info
         if (isset($configData['xretail/pos/integrate_gc'])) {
             if ($configData['xretail/pos/integrate_gc'] === 'aheadWorks'
-               && !$this->integrateHelperData->isAHWGiftCardxist()) {
+                && !$this->integrateHelperData->isAHWGiftCardxist()) {
                 throw new LocalizedException(
                     __('Module Aheadworks_Giftcard is not found!')
                 );
@@ -277,8 +295,10 @@ class SettingManagement extends ServiceAbstract
             if (json_last_error()) {
                 $result = $value;
             }
+
             return $result;
         }
+
         return $value;
     }
 }
