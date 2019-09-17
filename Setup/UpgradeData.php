@@ -53,11 +53,15 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.0.8', '<')) {
             $this->dummySettingEnableDefaultCategory($setup);
         }
+
+        if (version_compare($context->getVersion(), '0.0.9', '<')) {
+            $this->dummyCposDefaultSettings($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
     {
-        $configData  = $setup->getTable('core_config_data');
+        $configData = $setup->getTable('core_config_data');
         $setup->getConnection()->insertArray(
             $configData,
             [
@@ -100,7 +104,7 @@ class UpgradeData implements UpgradeDataInterface
     protected function dummyIntergrateGCExtension(ModuleDataSetupInterface $setup)
     {
         $configData = $setup->getTable('core_config_data');
-        $data = [
+        $data       = [
             'path'     => "xretail/pos/integrate_gc",
             'value'    => "none",
             'scope'    => 'default',
@@ -112,7 +116,7 @@ class UpgradeData implements UpgradeDataInterface
     protected function addUseProductOnlineModeSetting(ModuleDataSetupInterface $setup)
     {
         $configData = $setup->getTable('core_config_data');
-        $data = [
+        $data       = [
             'path'     => "xretail/pos/use_product_online_mode",
             'value'    => 0,
             'scope'    => 'default',
@@ -124,7 +128,7 @@ class UpgradeData implements UpgradeDataInterface
     protected function addUseMagentoRecommendation(ModuleDataSetupInterface $setup)
     {
         $configData = $setup->getTable('core_config_data');
-        $data = [
+        $data       = [
             'path'     => "xretail/pos/use_magento_recommendation",
             'value'    => 1,
             'scope'    => 'default',
@@ -133,9 +137,10 @@ class UpgradeData implements UpgradeDataInterface
         $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
     }
 
-    protected function addFeaturedProductRecommendation(ModuleDataSetupInterface $setup) {
+    protected function addFeaturedProductRecommendation(ModuleDataSetupInterface $setup)
+    {
         $configData = $setup->getTable('core_config_data');
-        $data = [
+        $data       = [
             'path'     => "xretail/pos/featured_product_recommendation",
             'value'    => json_encode([]),
             'scope'    => 'default',
@@ -144,8 +149,9 @@ class UpgradeData implements UpgradeDataInterface
         $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
     }
 
-    protected function addOtherSettingSecondScreen(ModuleDataSetupInterface $setup) {
-        $configData  = $setup->getTable('core_config_data');
+    protected function addOtherSettingSecondScreen(ModuleDataSetupInterface $setup)
+    {
+        $configData = $setup->getTable('core_config_data');
         $setup->getConnection()->insertArray(
             $configData,
             [
@@ -179,87 +185,50 @@ class UpgradeData implements UpgradeDataInterface
 
     protected function addIntegrateStoreCredit(ModuleDataSetupInterface $setup)
     {
-        $configData = $setup->getTable('core_config_data');
-        $data = [
-            'path'     => "xretail/pos/integrate_store_credit",
-            'value'    => "none",
-            'scope'    => 'default',
-            'scope_id' => 0,
-        ];
-        $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
+        $this->dummySetting($setup, 'xretail/pos/integrate_store_credit', 'none');
     }
 
     protected function addShowSaleTagOnProductSetting(ModuleDataSetupInterface $setup)
     {
-        $configData = $setup->getTable('core_config_data');
-        $data = [
-            'path'     => "xretail/pos/show_sales_tag",
-            'value'    => 1,
-            'scope'    => 'default',
-            'scope_id' => 0,
-        ];
-        $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
+        $this->dummySetting($setup, 'xretail/pos/show_sales_tag', 1);
     }
 
     protected function dummySettingVeriface(ModuleDataSetupInterface $setup)
     {
-        $configData  = $setup->getTable('core_config_data');
-        $setup->getConnection()->insertArray(
-            $configData,
-            [
-                'path',
-                'value',
-                'scope',
-                'scope_id'
-            ],
-            [
-                [
-                    'path'     => "xretail/pos/veriface",
-                    'value'    => 0,
-                    'scope'    => 'default',
-                    'scope_id' => 0
-                ],
-                [
-                    'path'     => "xretail/pos/veriface_username",
-                    'value'    => '',
-                    'scope'    => 'default',
-                    'scope_id' => 0
-                ],
-                [
-                    'path'     => "xretail/pos/veriface_password",
-                    'value'    => '',
-                    'scope'    => 'default',
-                    'scope_id' => 0
-                ],
-                [
-                    'path'     => "xretail/pos/veriface_token",
-                    'value'    => '',
-                    'scope'    => 'default',
-                    'scope_id' => 0
-                ]
-            ]
-        );
+        $this->dummySetting($setup, 'xretail/pos/veriface', 0);
+        $this->dummySetting($setup, 'xretail/pos/veriface_username', '');
+        $this->dummySetting($setup, 'xretail/pos/veriface_password', '');
+        $this->dummySetting($setup, 'xretail/pos/veriface_token', '');
     }
 
     protected function dummySettingEnableDefaultCategory(ModuleDataSetupInterface $setup)
     {
-        $configData  = $setup->getTable('core_config_data');
-        $setup->getConnection()->insertArray(
-            $configData,
-            [
-                'path',
-                'value',
-                'scope',
-                'scope_id'
-            ],
-            [
-                [
-                    'path'     => "xretail/pos/enable_default_category",
-                    'value'    => 0,
-                    'scope'    => 'default',
-                    'scope_id' => 0
-                ]
-            ]
-        );
+        $this->dummySetting($setup, 'xretail/pos/enable_default_category', 0);
+    }
+
+    protected function dummyCposDefaultSettings(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/custom_sale_tax_class', 0);
+        $this->dummySetting($setup, 'xretail/pos/sync_when_cart_changes', 0);
+        $this->dummySetting($setup, 'xretail/pos/integrate_freegift', 'none');
+        $this->dummySetting($setup, 'xretail/pos/allow_pending_order', 0);
+    }
+
+    protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
+    {
+        $configData = $setup->getTable('core_config_data');
+        $select     = $setup->getConnection()
+                            ->select()
+                            ->from($configData)
+                            ->where('path = ?', $path);
+        if (count($setup->getConnection()->fetchAll($select)) < 1) {
+            $data = [
+                'path'     => $path,
+                'value'    => $value,
+                'scope'    => 'default',
+                'scope_id' => 0
+            ];
+            $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
+        }
     }
 }
