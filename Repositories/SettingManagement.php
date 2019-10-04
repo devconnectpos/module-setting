@@ -193,6 +193,8 @@ class SettingManagement extends ServiceAbstract
 
             $config["productAttributes"] = $this->productHelper->getProductAttributes();
             if ($this->integrateHelperData->isAHWGiftCardxist()
+                && isset($configData['xretail/pos/integrate_gc'])
+                && $configData['xretail/pos/integrate_gc']['value'] === 'aheadWorks'
                 && $this->integrateHelperData->isIntegrateGC()) {
                 $config['list_code_pools'] = $this->gcIntegrateManagement->getGCCodePool();
             }
