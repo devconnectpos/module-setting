@@ -57,6 +57,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.0.9', '<')) {
             $this->dummyCposDefaultSettings($setup);
         }
+
+        if (version_compare($context->getVersion(), '0.1.0', '<')) {
+            $this->dummyAllowOutOfStockSettings($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -212,6 +216,11 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/sync_when_cart_changes', 0);
         $this->dummySetting($setup, 'xretail/pos/integrate_freegift', 'none');
         $this->dummySetting($setup, 'xretail/pos/allow_pending_order', 0);
+    }
+
+    protected function dummyAllowOutOfStockSettings(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/allow_out_of_stock', 1);
     }
 
     protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
