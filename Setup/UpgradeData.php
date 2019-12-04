@@ -58,8 +58,8 @@ class UpgradeData implements UpgradeDataInterface
             $this->dummyCposDefaultSettings($setup);
         }
 
-        if (version_compare($context->getVersion(), '0.1.0', '<')) {
-            $this->dummyAllowOutOfStockSettings($setup);
+        if (version_compare($context->getVersion(), '0.1.1', '<')) {
+            $this->dummyAutoLockScreenSetting($setup);
         }
     }
 
@@ -218,9 +218,10 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/allow_pending_order', 0);
     }
 
-    protected function dummyAllowOutOfStockSettings(ModuleDataSetupInterface $setup)
+    protected function dummyAutoLockScreenSetting(ModuleDataSetupInterface $setup)
     {
-        $this->dummySetting($setup, 'xretail/pos/allow_out_of_stock', 1);
+        $this->dummySetting($setup, 'xretail/pos/auto_log_type', json_encode(["auto_log_per_minute"]));
+        $this->dummySetting($setup, 'xretail/pos/auto_log_minutes', 5);
     }
 
     protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
