@@ -61,6 +61,25 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.1', '<')) {
             $this->dummyAutoLockScreenSetting($setup);
         }
+        if (version_compare($context->getVersion(), '0.1.2', '<')) {
+            $this->dummyIntegrateCloudErp($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.1.3', '<')) {
+            $this->dummyAllowCheckBundleOptionAvailabilitySetting($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.1.4', '<')) {
+            $this->dummyIntegrateStorePickUpExtension($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.1.5', '<')) {
+            $this->dummyPvfBundleProductSettings($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.1.6', '<')) {
+            $this->dummyIntegrateRMAExtension($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -224,6 +243,16 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/auto_log_minutes', 5);
     }
 
+    protected function dummyIntegrateCloudErp(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/integrate_cloud_erp', 'none');
+    }
+
+    protected function dummyAllowCheckBundleOptionAvailabilitySetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/allow_check_bundle_option_availability', 0);
+    }
+
     protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
     {
         $configData = $setup->getTable('core_config_data');
@@ -240,5 +269,23 @@ class UpgradeData implements UpgradeDataInterface
             ];
             $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
         }
+    }
+
+    protected function dummyIntegrateStorePickUpExtension(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/integrate_store_pick_up_extension', 'none');
+    }
+
+    protected function dummyPvfBundleProductSettings(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/allow_check_bundle_option_availability', 0);
+        $this->dummySetting($setup, 'xretail/pos/show_estimated_availability', 0);
+        $this->dummySetting($setup, 'xretail/pos/attribute_for_estimated_availability', '');
+        $this->dummySetting($setup, 'xretail/pos/unit_type_for_estimated_availability', 'Days');
+    }
+
+    protected function dummyIntegrateRMAExtension(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/integrate_rma_extension', 'none');
     }
 }

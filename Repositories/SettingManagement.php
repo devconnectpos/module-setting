@@ -1,13 +1,8 @@
 <?php
-/**
- * Created by mr.vjcspy@gmail.com - khoild@smartosc.com.
- * Date: 07/11/2016
- * Time: 15:54
- */
-
 namespace SM\Setting\Repositories;
 
 use Exception;
+use Magento\Catalog\Model\Product;
 use Magento\Config\Model\Config\Loader;
 use Magento\Config\Model\ResourceModel\Config;
 use Magento\Framework\App\Cache\TypeListInterface;
@@ -64,6 +59,10 @@ class SettingManagement extends ServiceAbstract
      * @var \Magento\Framework\App\Cache\TypeListInterface
      */
     protected $cacheTypeList;
+    /**
+     * @var \Magento\Eav\Model\Config
+     */
+    protected $eavConfig;
 
     /**
      * @var \SM\Product\Helper\ProductHelper
@@ -95,6 +94,7 @@ class SettingManagement extends ServiceAbstract
      * @param \Magento\Framework\App\Config\ScopeConfigInterface    $scopeConfig
      * @param \Magento\Framework\App\Config\Storage\WriterInterface $configWriter
      * @param \Magento\Framework\App\Cache\TypeListInterface        $cacheTypeList
+     * @param \Magento\Eav\Model\Config                             $eavConfig
      */
     public function __construct(
         RequestInterface $requestInterface,
@@ -109,7 +109,8 @@ class SettingManagement extends ServiceAbstract
         ProductHelper $productHelper,
         ScopeConfigInterface $scopeConfig,
         WriterInterface $configWriter,
-        TypeListInterface $cacheTypeList
+        TypeListInterface $cacheTypeList,
+        \Magento\Eav\Model\Config $eavConfig
     ) {
         $this->configLoader          = $loader;
         $this->configResource        = $config;
@@ -122,6 +123,7 @@ class SettingManagement extends ServiceAbstract
         $this->scopeConfig           = $scopeConfig;
         $this->configWriter          = $configWriter;
         $this->cacheTypeList         = $cacheTypeList;
+        $this->eavConfig             = $eavConfig;
         parent::__construct($requestInterface, $dataConfig, $storeManager);
     }
 
@@ -132,8 +134,7 @@ class SettingManagement extends ServiceAbstract
     public function getSettingData()
     {
         $settings = [];
-        if ($this->getSearchCriteria()->getData('currentPage') != 1) {
-        } else {
+        if ($this->getSearchCriteria()->getData('currentPage') == 1) {
             // Các function get data liên quan đến store sẽ lấy theo store này.
             $store = $this->getSearchCriteria()->getData('storeId');
             if (is_null($store)) {
@@ -183,8 +184,7 @@ class SettingManagement extends ServiceAbstract
         $searchCriteria = $this->getSearchCriteria();
 
         $configs = [];
-        if ($searchCriteria->getData('currentPage') > 1) {
-        } else {
+        if ($searchCriteria->getData('currentPage') <= 1) {
             $config     = [];
             $configData = $this->configLoader->getConfigByPath('xretail/pos', 'default', 0);
             foreach ($configData as $configDatum) {
@@ -280,6 +280,38 @@ class SettingManagement extends ServiceAbstract
                 );
             }
         }
+        //check saving store pick up integration info
+        if (isset($configData['xretail/pos/integrate_store_pick_up_extension'])) {
+            if ($configData['xretail/pos/integrate_store_pick_up_extension'] === 'mageworx'
+                && !$this->integrateHelperData->isExistMageWorx()) {
+                throw new LocalizedException(
+                    __('Module MageWorx_Locations is not found!')
+                );
+            }
+        }
+        //check saving rma integration info
+        if (isset($configData['xretail/pos/integrate_rma_extension'])) {
+            if ($configData['xretail/pos/integrate_rma_extension'] === 'aheadWorks'
+                && !$this->integrateHelperData->isExistAheadWorksRMA()) {
+                throw new LocalizedException(
+                    __('Module Aheadworks_Rma is not found!')
+                );
+            }
+        }
+
+        //check show estimated availability
+        if (isset($configData['xretail/pos/show_estimated_availability'])) {
+            if ($configData['xretail/pos/show_estimated_availability']
+                && isset($configData['xretail/pos/attribute_for_estimated_availability'])
+                && !!$configData['xretail/pos/attribute_for_estimated_availability']) {
+                if (!$this->isProductAttributeExists($configData['xretail/pos/attribute_for_estimated_availability'])) {
+                    throw new LocalizedException(
+                        __("The attribute '%1' does not exist!", $configData['xretail/pos/attribute_for_estimated_availability'])
+                    );
+                }
+            }
+        }
+
         $this->searchCriteria = new DataObject(
             [
                 'group'       => $this->getRequest()->getParam('group'),
@@ -302,5 +334,18 @@ class SettingManagement extends ServiceAbstract
         }
 
         return $value;
+    }
+
+    /**
+     * @param string $attribute
+     *
+     * @return bool
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    protected function isProductAttributeExists($attribute)
+    {
+        $attr = $this->eavConfig->getAttribute(Product::ENTITY, $attribute);
+
+        return ($attr && $attr->getId()) ? true : false;
     }
 }
