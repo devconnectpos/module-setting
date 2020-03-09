@@ -192,10 +192,7 @@ class SettingManagement extends ServiceAbstract
             }
 
             $config["productAttributes"] = $this->productHelper->getProductAttributes();
-            if ($this->integrateHelperData->isAHWGiftCardxist()
-                && isset($configData['xretail/pos/integrate_gc'])
-                && $configData['xretail/pos/integrate_gc']['value'] === 'aheadWorks'
-                && $this->integrateHelperData->isIntegrateGC()) {
+            if ($this->integrateHelperData->isAHWGiftCardExist()) {
                 $config['list_code_pools'] = $this->gcIntegrateManagement->getGCCodePool();
             }
 
@@ -240,7 +237,7 @@ class SettingManagement extends ServiceAbstract
             $customerSales->save();
         }
         if (isset($configData['xretail/pos/integrate_gc'])
-            && $this->integrateHelperData->isAHWGiftCardxist()) {
+            && $this->integrateHelperData->isAHWGiftCardExist()) {
             if ($configData['xretail/pos/integrate_gc'] == "aheadWorks") {
                 $data = [];
                 if (isset($configData['xretail/pos/is_use_default_codepool_pattern'])) {
@@ -268,11 +265,21 @@ class SettingManagement extends ServiceAbstract
         }
         //check saving gift card integration info
         if (isset($configData['xretail/pos/integrate_gc'])) {
-            if ($configData['xretail/pos/integrate_gc'] === 'aheadWorks'
-                && !$this->integrateHelperData->isAHWGiftCardxist()) {
-                throw new LocalizedException(
-                    __('Module Aheadworks_Giftcard is not found!')
-                );
+            if ($configData['xretail/pos/integrate_gc'] === 'aheadWorks') {
+                if (!$this->integrateHelperData->isAHWGiftCardExist()) {
+                    throw new LocalizedException(
+                        __('Module Aheadworks_Giftcard is not found!')
+                    );
+                }
+
+                if (isset($configData['xretail/pos/is_use_default_codepool_pattern'])
+                    && !$configData['xretail/pos/is_use_default_codepool_pattern']
+                    && !$configData['xretail/pos/refund_gc_codepool']) {
+                    throw new LocalizedException(
+                        __('No Code Pool found! Please go to backend and create Code Pool first.')
+                    );
+                }
+
             } elseif ($configData['xretail/pos/integrate_gc'] === 'mage2_ee'
                       && !$this->integrateHelperData->isGiftCardMagento2EE()) {
                 throw new LocalizedException(
