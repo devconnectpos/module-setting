@@ -80,6 +80,9 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.6', '<')) {
             $this->dummyIntegrateRMAExtension($setup);
         }
+        if (version_compare($context->getVersion(), '0.1.7', '<')) {
+            $this->dummyTaxPercentAmountPrintLabel($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -287,5 +290,10 @@ class UpgradeData implements UpgradeDataInterface
     protected function dummyIntegrateRMAExtension(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/integrate_rma_extension', 'none');
+    }
+
+    protected function dummyTaxPercentAmountPrintLabel(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/tax_percent_amount', 10);
     }
 }
