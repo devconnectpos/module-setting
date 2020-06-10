@@ -318,6 +318,16 @@ class SettingManagement extends ServiceAbstract
                 }
             }
         }
+        
+        //check saving order comment integration setting
+	    if (isset($configData['xretail/pos/integrate_order_comment_extensions'])) {
+		    if ($configData['xretail/pos/integrate_order_comment_extensions'] === 'boldCommerce'
+			    && !$this->integrateHelperData->isExistBoldOrderComment()) {
+			    throw new LocalizedException(
+				    __('Module Bold_OrderComment is not found!')
+			    );
+		    }
+	    }
 
         $this->searchCriteria = new DataObject(
             [
