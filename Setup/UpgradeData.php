@@ -83,6 +83,15 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.7', '<')) {
             $this->dummyTaxPercentAmountPrintLabel($setup);
         }
+        if (version_compare($context->getVersion(), '0.1.8', '<')) {
+            $this->dummyAllowRefundPendingOrderSetting($setup);
+        }
+        if (version_compare($context->getVersion(), '0.1.9', '<')) {
+            $this->dummyIntegrateOrderCommentExtension($setup);
+        }
+        if (version_compare($context->getVersion(), '0.2.0', '<')) {
+            $this->addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -296,4 +305,19 @@ class UpgradeData implements UpgradeDataInterface
     {
         $this->dummySetting($setup, 'xretail/pos/tax_percent_amount', 10);
     }
+
+    protected function dummyAllowRefundPendingOrderSetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/allow_refund_pending_order', 0);
+    }
+	
+	protected function dummyIntegrateOrderCommentExtension(ModuleDataSetupInterface $setup)
+	{
+		$this->dummySetting($setup, 'xretail/pos/integrate_order_comment_extensions', 'none');
+	}
+	
+	protected function addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt(ModuleDataSetupInterface $setup)
+	{
+		$this->dummySetting($setup, 'xretail/pos/deduct_rp_when_refund_without_receipt', 0);
+	}
 }
