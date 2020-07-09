@@ -336,9 +336,11 @@ class UpgradeData implements UpgradeDataInterface
     {
         $this->dummySetting($setup, 'xretail/pos/print_label_barcode_type', 'CODE128');
         $this->dummySetting($setup, 'xretail/pos/print_label_barcode_attribute', 'sku');
-        $this->dummySetting($setup, 'xretail/pos/print_label_label_size', '2x2');
-        $this->dummySetting($setup, 'xretail/pos/print_label_width', '2');
-        $this->dummySetting($setup, 'xretail/pos/print_label_height', '2');
+        $this->dummySetting($setup, 'xretail/pos/print_label_unit_system', 'metric');
+        $this->dummySetting($setup, 'xretail/pos/print_label_label_size', '50x20');
+        $this->dummySetting($setup, 'xretail/pos/print_label_width', '50');
+        $this->dummySetting($setup, 'xretail/pos/print_label_height', '20');
+        $this->dummySetting($setup, 'xretail/pos/print_label_distance_between_labels', '10');
         $this->dummySetting($setup, 'xretail/pos/print_label_label_detail', json_encode(["sku", "product_name", "price", "date"]));
         $this->dummySetting($setup, 'xretail/pos/print_label_display_value', 0);
     }
