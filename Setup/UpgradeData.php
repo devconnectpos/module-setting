@@ -89,6 +89,13 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.9', '<')) {
             $this->dummyIntegrateOrderCommentExtension($setup);
         }
+        if (version_compare($context->getVersion(), '0.2.0', '<')) {
+            $this->addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.2.1', '<')) {
+            $this->addSettingForPrintLabel($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -312,4 +319,25 @@ class UpgradeData implements UpgradeDataInterface
 	{
 		$this->dummySetting($setup, 'xretail/pos/integrate_order_comment_extensions', 'none');
 	}
+	
+	protected function addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt(ModuleDataSetupInterface $setup)
+	{
+		$this->dummySetting($setup, 'xretail/pos/deduct_rp_when_refund_without_receipt', 0);
+	}
+
+    /**
+     * @param \Magento\Framework\Setup\ModuleDataSetupInterface $setup
+     */
+    protected function addSettingForPrintLabel(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/print_label_barcode_type', 'CODE128');
+        $this->dummySetting($setup, 'xretail/pos/print_label_barcode_attribute', 'sku');
+        $this->dummySetting($setup, 'xretail/pos/print_label_unit_system', 'metric');
+        $this->dummySetting($setup, 'xretail/pos/print_label_label_size', '35x22');
+        $this->dummySetting($setup, 'xretail/pos/print_label_width', '35');
+        $this->dummySetting($setup, 'xretail/pos/print_label_height', '22');
+        $this->dummySetting($setup, 'xretail/pos/print_label_distance_between_labels', '3');
+        $this->dummySetting($setup, 'xretail/pos/print_label_label_detail', json_encode(["sku", "product_name", "price", "date"]));
+        $this->dummySetting($setup, 'xretail/pos/print_label_display_value', 0);
+    }
 }
