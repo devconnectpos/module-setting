@@ -100,6 +100,11 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.2', '<')) {
             $this->addSettingAutoOpenShipping($setup);
         }
+        
+        if (version_compare($context->getVersion(), '0.2.3', '<')) {
+            $this->addSettingProductSearchWhenTyping($setup);
+            $this->addSettingCustomerSearchWhenTyping($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -348,5 +353,15 @@ class UpgradeData implements UpgradeDataInterface
 	protected function addSettingAutoOpenShipping(ModuleDataSetupInterface $setup)
 	{
 		$this->dummySetting($setup, 'xretail/pos/auto_open_shipping', 0);
+	}
+	
+	protected function addSettingProductSearchWhenTyping(ModuleDataSetupInterface $setup)
+	{
+		$this->dummySetting($setup, 'xretail/pos/product_search_when_typing', 1);
+	}
+	
+	protected function addSettingCustomerSearchWhenTyping(ModuleDataSetupInterface $setup)
+	{
+		$this->dummySetting($setup, 'xretail/pos/customer_search_when_typing', 1);
 	}
 }
