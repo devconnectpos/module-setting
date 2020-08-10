@@ -96,6 +96,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.1', '<')) {
             $this->addSettingForPrintLabel($setup);
         }
+
+        if (version_compare($context->getVersion(), '0.2.2', '<')) {
+            $this->addSettingForPrintLabelFixedPrinter($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -339,5 +343,14 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/print_label_distance_between_labels', '3');
         $this->dummySetting($setup, 'xretail/pos/print_label_label_detail', json_encode(["sku", "product_name", "price", "date"]));
         $this->dummySetting($setup, 'xretail/pos/print_label_display_value', 0);
+    }
+
+    /**
+     * @param \Magento\Framework\Setup\ModuleDataSetupInterface $setup
+     */
+    protected function addSettingForPrintLabelFixedPrinter(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/number_sticker_in_line', '2');
+        $this->dummySetting($setup, 'xretail/pos/exist_space_between_label', 1);
     }
 }
