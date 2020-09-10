@@ -6,9 +6,9 @@
 
 namespace SM\Setting\Setup;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Framework\Setup\UpgradeDataInterface;
 
 /**
  * @codeCoverageIgnore
@@ -96,14 +96,18 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.1', '<')) {
             $this->addSettingForPrintLabel($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.2', '<')) {
             $this->addSettingAutoOpenShipping($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.3', '<')) {
             $this->addSettingProductSearchWhenTyping($setup);
             $this->addSettingCustomerSearchWhenTyping($setup);
+        }
+        
+        if (version_compare($context->getVersion(), '0.2.4', '<')) {
+            $this->addAccessTokenKeySetting($setup);
         }
     }
 
@@ -134,7 +138,6 @@ class UpgradeData implements UpgradeDataInterface
             ]
         );
     }
-
 
     protected function dummySelectSeller(ModuleDataSetupInterface $setup)
     {
@@ -323,16 +326,16 @@ class UpgradeData implements UpgradeDataInterface
     {
         $this->dummySetting($setup, 'xretail/pos/allow_refund_pending_order', 0);
     }
-	
-	protected function dummyIntegrateOrderCommentExtension(ModuleDataSetupInterface $setup)
-	{
-		$this->dummySetting($setup, 'xretail/pos/integrate_order_comment_extensions', 'none');
-	}
-	
-	protected function addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt(ModuleDataSetupInterface $setup)
-	{
-		$this->dummySetting($setup, 'xretail/pos/deduct_rp_when_refund_without_receipt', 0);
-	}
+
+    protected function dummyIntegrateOrderCommentExtension(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/integrate_order_comment_extensions', 'none');
+    }
+
+    protected function addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/deduct_rp_when_refund_without_receipt', 0);
+    }
 
     /**
      * @param \Magento\Framework\Setup\ModuleDataSetupInterface $setup
@@ -349,19 +352,24 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/print_label_label_detail', json_encode(["sku", "product_name", "price", "date"]));
         $this->dummySetting($setup, 'xretail/pos/print_label_display_value', 0);
     }
-	
-	protected function addSettingAutoOpenShipping(ModuleDataSetupInterface $setup)
-	{
-		$this->dummySetting($setup, 'xretail/pos/auto_open_shipping', 0);
-	}
-	
-	protected function addSettingProductSearchWhenTyping(ModuleDataSetupInterface $setup)
-	{
-		$this->dummySetting($setup, 'xretail/pos/product_search_when_typing', 1);
-	}
-	
-	protected function addSettingCustomerSearchWhenTyping(ModuleDataSetupInterface $setup)
-	{
-		$this->dummySetting($setup, 'xretail/pos/customer_search_when_typing', 1);
-	}
+
+    protected function addSettingAutoOpenShipping(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/auto_open_shipping', 0);
+    }
+
+    protected function addSettingProductSearchWhenTyping(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/product_search_when_typing', 1);
+    }
+
+    protected function addSettingCustomerSearchWhenTyping(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/customer_search_when_typing', 1);
+    }
+
+    protected function addAccessTokenKeySetting(ModuleDataSetupInterface $setup)
+    {
+	    $this->dummySetting($setup, 'xretail/pos/access_token_key', null);
+    }
 }
