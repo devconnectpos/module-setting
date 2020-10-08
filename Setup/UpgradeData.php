@@ -109,8 +109,13 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.4', '<')) {
             $this->addAccessTokenKeySetting($setup);
         }
+        
         if (version_compare($context->getVersion(), '0.2.5', '<')) {
             $this->addAPISecuredSecretKey($setup);
+        }
+        
+        if (version_compare($context->getVersion(), '0.2.6', '<')) {
+            $this->addSecureRequestSetting($setup);
         }
     }
 
@@ -390,5 +395,13 @@ class UpgradeData implements UpgradeDataInterface
     private final function generateNewSecretKey() {
         $stringKey = rand();
         return hash("sha256", $stringKey);
+    }
+    
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
+    protected function addSecureRequestSetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/enable_secure_request', 0);
     }
 }
