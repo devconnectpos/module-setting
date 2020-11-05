@@ -42,6 +42,10 @@ class Customer extends AbstractSetting implements SettingInterface
      */
     protected $customerManagement;
     /**
+     * @var \SM\XRetail\Model\OutletRepository
+     */
+    protected $outletRepository;
+    /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
     private $storeManager;
@@ -49,16 +53,17 @@ class Customer extends AbstractSetting implements SettingInterface
      * @var \Magento\Customer\Helper\Address
      */
     private $customerAddressHelper;
-
+    
     /**
      * Customer constructor.
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Customer\Api\GroupManagementInterface     $customerGroupManagement
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface  $customerRepository
-     * @param \SM\Customer\Repositories\CustomerManagement       $customerManagement
-     * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
-     * @param \Magento\Customer\Helper\Address                   $customerAddressHelper
+     * @param \Magento\Customer\Api\GroupManagementInterface $customerGroupManagement
+     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
+     * @param \SM\Customer\Repositories\CustomerManagement $customerManagement
+     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
+     * @param \Magento\Customer\Helper\Address $customerAddressHelper
+     * @param \SM\XRetail\Model\OutletRepository $outletRepository
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -66,7 +71,8 @@ class Customer extends AbstractSetting implements SettingInterface
         CustomerRepositoryInterface $customerRepository,
         CustomerManagement $customerManagement,
         StoreManagerInterface $storeManager,
-        Address $customerAddressHelper
+        Address $customerAddressHelper,
+        \SM\XRetail\Model\OutletRepository $outletRepository
     ) {
         $this->storeManager            = $storeManager;
         $this->customerManagement      = $customerManagement;
@@ -74,6 +80,7 @@ class Customer extends AbstractSetting implements SettingInterface
         $this->customerRepository      = $customerRepository;
         $this->customerAddressHelper   = $customerAddressHelper;
         parent::__construct($scopeConfig);
+        $this->outletRepository = $outletRepository;
     }
 
     /**
@@ -114,17 +121,20 @@ class Customer extends AbstractSetting implements SettingInterface
      */
     private function getDefaultCustomerId()
     {
+        $outlet = $this->outletRepository->getById($this->getOutletId());
+        $defaultGuestCustomerEmail = $outlet->getData('default_guest_customer_email');
         try {
-            $customer = $this->customerRepository->get(Data::DEFAULT_CUSTOMER_RETAIL_EMAIL, $this->getWebsiteId());
+            $customer = $this->customerRepository
+                ->get($defaultGuestCustomerEmail, $this->getWebsiteId());
         } catch (Exception $e) {
             $customer = null;
         }
-        if (!is_null($customer) && $customer->getId()) {
+        if ($customer && $customer->getId()) {
             return $customer->getId();
         } else {
             $data = [
                 "group_id"    => $this->customerGroupManagement->getDefaultGroup($this->getStore())->getId(),
-                "email"       => Data::DEFAULT_CUSTOMER_RETAIL_EMAIL,
+                "email"       => $defaultGuestCustomerEmail,
                 "first_name"  => "Guest",
                 "last_name"   => "Customer",
                 "middle_name" => "",

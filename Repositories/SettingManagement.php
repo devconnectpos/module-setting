@@ -137,6 +137,7 @@ class SettingManagement extends ServiceAbstract
         if ($this->getSearchCriteria()->getData('currentPage') == 1) {
             // Các function get data liên quan đến store sẽ lấy theo store này.
             $store = $this->getSearchCriteria()->getData('storeId');
+            $outletId = $this->getSearchCriteria()->getData('outletId');
             if (is_null($store)) {
                 throw  new Exception("Must have param storeId");
             }
@@ -146,6 +147,7 @@ class SettingManagement extends ServiceAbstract
                 /** @var \SM\Setting\Repositories\SettingManagement\AbstractSetting $instance */
                 $instance = $this->objectManager->create($item);
                 $instance->setStore($store);
+                $instance->setOutletId($outletId);
                 $setting = new XSetting();
                 $setting->setData('key', $instance->getCODE());
                 $setting->setData('value', $instance->build());
