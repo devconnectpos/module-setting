@@ -25,6 +25,8 @@ abstract class AbstractSetting
      * @var
      */
     protected $store;
+    
+    protected $outletId;
 
     /**
      * AbstractSetting constructor.
@@ -80,5 +82,15 @@ abstract class AbstractSetting
     public function setStore($store)
     {
         $this->store = $store;
+    }
+    
+    public function getOutletId()
+    {
+        return $this->outletId;
+    }
+    
+    public function setOutletId($outletId)
+    {
+        $this->outletId = $outletId;
     }
 }
