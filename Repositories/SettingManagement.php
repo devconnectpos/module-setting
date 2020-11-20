@@ -258,6 +258,11 @@ class SettingManagement extends ServiceAbstract
                 throw new LocalizedException(
                     __('Module Aheadworks_RewardPoints is not found!')
                 );
+            } elseif ($configData['xretail/pos/integrate_rp'] === 'amasty'
+                && !$this->integrateHelperData->isAmastyRewardPointsExist()) {
+                throw new LocalizedException(
+                    __('Module Amasty_Rewards cannot be found!')
+                );
             } elseif ($configData['xretail/pos/integrate_rp'] === 'mage2_ee'
                       && !$this->integrateHelperData->isRewardPointMagento2EEExist()) {
                 throw new LocalizedException(
