@@ -117,6 +117,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.6', '<')) {
             $this->addSecureRequestSetting($setup);
         }
+        
+        if (version_compare($context->getVersion(), '0.2.7', '<')) {
+            $this->addAutoSendCreditMemoEmailSetting($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -403,5 +407,10 @@ class UpgradeData implements UpgradeDataInterface
     protected function addSecureRequestSetting(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/enable_secure_request', 0);
+    }
+    
+    protected function addAutoSendCreditMemoEmailSetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/auto_send_credit_memo_email', 0);
     }
 }
