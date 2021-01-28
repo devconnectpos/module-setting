@@ -121,8 +121,14 @@ class Customer extends AbstractSetting implements SettingInterface
      */
     private function getDefaultCustomerId()
     {
-        $outlet = $this->outletRepository->getById($this->getOutletId());
-        $defaultGuestCustomerEmail = $outlet->getData('default_guest_customer_email');
+        
+        if (!$this->getOutletId()) {
+            $defaultGuestCustomerEmail =  \SM\Customer\Helper\Data::DEFAULT_CUSTOMER_RETAIL_EMAIL;
+        } else {
+            $outlet = $this->outletRepository->getById($this->getOutletId());
+            $defaultGuestCustomerEmail = $outlet->getData('default_guest_customer_email');
+        }
+
         try {
             $customer = $this->customerRepository
                 ->get($defaultGuestCustomerEmail, $this->getWebsiteId());

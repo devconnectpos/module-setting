@@ -147,7 +147,9 @@ class SettingManagement extends ServiceAbstract
                 /** @var \SM\Setting\Repositories\SettingManagement\AbstractSetting $instance */
                 $instance = $this->objectManager->create($item);
                 $instance->setStore($store);
-                $instance->setOutletId($outletId);
+                if ($outletId) {
+                    $instance->setOutletId($outletId);
+                }
                 $setting = new XSetting();
                 $setting->setData('key', $instance->getCODE());
                 $setting->setData('value', $instance->build());
