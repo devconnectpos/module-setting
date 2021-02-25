@@ -105,21 +105,25 @@ class UpgradeData implements UpgradeDataInterface
             $this->addSettingProductSearchWhenTyping($setup);
             $this->addSettingCustomerSearchWhenTyping($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.4', '<')) {
             $this->addAccessTokenKeySetting($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.5', '<')) {
             $this->addAPISecuredSecretKey($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.6', '<')) {
             $this->addSecureRequestSetting($setup);
         }
-        
+
         if (version_compare($context->getVersion(), '0.2.7', '<')) {
             $this->addAutoSendCreditMemoEmailSetting($setup);
+        }
+
+        if (version_compare($context->getVersion(), '0.2.8', '<')) {
+            $this->addAutoReturnToStockWhenRefundSetting($setup);
         }
     }
 
@@ -382,7 +386,7 @@ class UpgradeData implements UpgradeDataInterface
 
     protected function addAccessTokenKeySetting(ModuleDataSetupInterface $setup)
     {
-	    $this->dummySetting($setup, 'xretail/pos/access_token_key', null);
+        $this->dummySetting($setup, 'xretail/pos/access_token_key', null);
     }
 
     /**
@@ -396,11 +400,12 @@ class UpgradeData implements UpgradeDataInterface
     /**
      * @return string
      */
-    private final function generateNewSecretKey() {
+    final private function generateNewSecretKey()
+    {
         $stringKey = rand();
         return hash("sha256", $stringKey);
     }
-    
+
     /**
      * @param ModuleDataSetupInterface $setup
      */
@@ -408,9 +413,14 @@ class UpgradeData implements UpgradeDataInterface
     {
         $this->dummySetting($setup, 'xretail/pos/enable_secure_request', 0);
     }
-    
+
     protected function addAutoSendCreditMemoEmailSetting(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/auto_send_credit_memo_email', 0);
+    }
+
+    protected function addAutoReturnToStockWhenRefundSetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/auto_return_to_stock', 1);
     }
 }
