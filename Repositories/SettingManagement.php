@@ -210,6 +210,10 @@ class SettingManagement extends ServiceAbstract
                 $config["xretail/pos/integrate_wh"] = "bms";
             }
 
+            if (!!$this->integrateHelperData->isMagestoreInventory()) {
+                $config["xretail/pos/integrate_wh"] = "mage_store";
+            }
+
             $retailConfig = new RetailConfig();
             $retailConfig->setData('key', 'pos')->setData('value', $config);
             $configs[] = $retailConfig;
