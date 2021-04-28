@@ -125,6 +125,10 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.2.8', '<')) {
             $this->addAutoReturnToStockWhenRefundSetting($setup);
         }
+
+        if (version_compare($context->getVersion(), '0.2.9', '<')) {
+            $this->addStripeApiKeySetting($setup);
+        }
     }
 
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
@@ -422,5 +426,10 @@ class UpgradeData implements UpgradeDataInterface
     protected function addAutoReturnToStockWhenRefundSetting(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/auto_return_to_stock', 1);
+    }
+
+    protected function addStripeApiKeySetting(ModuleDataSetupInterface $setup)
+    {
+        $this->dummySetting($setup, 'xretail/pos/stripe_api_key', "");
     }
 }
