@@ -21,23 +21,25 @@ class UpgradeData implements UpgradeDataInterface
      */
     public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
-        $installer->startSetup();
         if (version_compare($context->getVersion(), '0.0.3', '<')) {
             $this->dummySettingCategories($setup);
             $this->addUseProductOnlineModeSetting($setup);
         }
+
         if (version_compare($context->getVersion(), '0.0.4', '<')) {
             $this->dummyIntergrateGCExtension($setup);
         }
+
         if (version_compare($context->getVersion(), '0.0.4', '<')) {
             $this->dummySelectSeller($setup);
         }
+
         if (version_compare($context->getVersion(), '0.0.5', '<')) {
             $this->addUseMagentoRecommendation($setup);
             $this->addFeaturedProductRecommendation($setup);
             $this->addOtherSettingSecondScreen($setup);
         }
+
         if (version_compare($context->getVersion(), '0.0.5', '<')) {
             $this->addIntegrateStoreCredit($setup);
         }
@@ -61,6 +63,7 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.1', '<')) {
             $this->dummyAutoLockScreenSetting($setup);
         }
+
         if (version_compare($context->getVersion(), '0.1.2', '<')) {
             $this->dummyIntegrateCloudErp($setup);
         }
@@ -80,15 +83,19 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '0.1.6', '<')) {
             $this->dummyIntegrateRMAExtension($setup);
         }
+
         if (version_compare($context->getVersion(), '0.1.7', '<')) {
             $this->dummyTaxPercentAmountPrintLabel($setup);
         }
+
         if (version_compare($context->getVersion(), '0.1.8', '<')) {
             $this->dummyAllowRefundPendingOrderSetting($setup);
         }
+
         if (version_compare($context->getVersion(), '0.1.9', '<')) {
             $this->dummyIntegrateOrderCommentExtension($setup);
         }
+
         if (version_compare($context->getVersion(), '0.2.0', '<')) {
             $this->addSettingAutoDeductRewardPointsWhenRefundWithoutReceipt($setup);
         }
@@ -162,7 +169,6 @@ class UpgradeData implements UpgradeDataInterface
     protected function dummySelectSeller(ModuleDataSetupInterface $setup)
     {
         $configData = $setup->getTable('core_config_data');
-
         $data = [
             'path'     => "xretail/pos/allow_select_seller",
             'value'    => 0,
