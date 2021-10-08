@@ -21,17 +21,15 @@ class InstallData implements InstallDataInterface
      */
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
     {
-        $installer = $setup;
-        $installer->startSetup();
         if (version_compare($context->getVersion(), '0.0.2', '<')) {
             $this->dummySetting($setup);
-        } elseif (version_compare($context->getVersion(), '0.0.3', '<')) {
-            $this->addUseProductOnlineModeSetting($setup);
         }
     }
 
     protected function dummySetting(ModuleDataSetupInterface $setup)
     {
+        $setup->startSetup();
+
         $configData  = $setup->getTable('core_config_data');
         $setup->getConnection()->insertArray(
             $configData,
@@ -164,5 +162,7 @@ class InstallData implements InstallDataInterface
                 ],
             ]
         );
+
+        $setup->endSetup();
     }
 }
