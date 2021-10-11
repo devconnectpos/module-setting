@@ -9,6 +9,7 @@ namespace SM\Setting\Setup;
 use \Magento\Framework\Setup\InstallDataInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use \Magento\Framework\Setup\ModuleDataSetupInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @codeCoverageIgnore
@@ -26,6 +27,19 @@ class InstallData implements InstallDataInterface
         }
     }
 
+    /**
+     * @param ModuleDataSetupInterface $setup
+     * @param OutputInterface          $output
+     */
+    public function execute(ModuleDataSetupInterface $setup, OutputInterface $output)
+    {
+        $output->writeln('  |__ Initialize POS settings');
+        $this->dummySetting($setup);
+    }
+
+    /**
+     * @param ModuleDataSetupInterface $setup
+     */
     protected function dummySetting(ModuleDataSetupInterface $setup)
     {
         $setup->startSetup();

@@ -138,6 +138,33 @@ class UpgradeData implements UpgradeDataInterface
         }
     }
 
+    protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
+    {
+        $configData = $setup->getTable('core_config_data');
+        $select     = $setup->getConnection()
+            ->select()
+            ->from($configData)
+            ->where('path = ?', $path);
+        if (count($setup->getConnection()->fetchAll($select)) < 1) {
+            $data = [
+                'path'     => $path,
+                'value'    => $value,
+                'scope'    => 'default',
+                'scope_id' => 0
+            ];
+            $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function generateNewSecretKey()
+    {
+        $stringKey = rand();
+        return hash("sha256", $stringKey);
+    }
+
     protected function dummySettingCategories(ModuleDataSetupInterface $setup)
     {
         $configData = $setup->getTable('core_config_data');
@@ -307,24 +334,6 @@ class UpgradeData implements UpgradeDataInterface
         $this->dummySetting($setup, 'xretail/pos/allow_check_bundle_option_availability', 0);
     }
 
-    protected function dummySetting(ModuleDataSetupInterface $setup, $path, $value)
-    {
-        $configData = $setup->getTable('core_config_data');
-        $select     = $setup->getConnection()
-                            ->select()
-                            ->from($configData)
-                            ->where('path = ?', $path);
-        if (count($setup->getConnection()->fetchAll($select)) < 1) {
-            $data = [
-                'path'     => $path,
-                'value'    => $value,
-                'scope'    => 'default',
-                'scope_id' => 0
-            ];
-            $setup->getConnection()->insertOnDuplicate($configData, $data, ['value']);
-        }
-    }
-
     protected function dummyIntegrateStorePickUpExtension(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/integrate_store_pick_up_extension', 'none');
@@ -405,15 +414,6 @@ class UpgradeData implements UpgradeDataInterface
     protected function addAPISecuredSecretKey(ModuleDataSetupInterface $setup)
     {
         $this->dummySetting($setup, 'xretail/pos/api_secret_key', $this->generateNewSecretKey());
-    }
-
-    /**
-     * @return string
-     */
-    final private function generateNewSecretKey()
-    {
-        $stringKey = rand();
-        return hash("sha256", $stringKey);
     }
 
     /**
