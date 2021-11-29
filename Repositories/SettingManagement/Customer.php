@@ -53,17 +53,17 @@ class Customer extends AbstractSetting implements SettingInterface
      * @var \Magento\Customer\Helper\Address
      */
     private $customerAddressHelper;
-    
+
     /**
      * Customer constructor.
      *
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param \Magento\Customer\Api\GroupManagementInterface $customerGroupManagement
-     * @param \Magento\Customer\Api\CustomerRepositoryInterface $customerRepository
-     * @param \SM\Customer\Repositories\CustomerManagement $customerManagement
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Customer\Helper\Address $customerAddressHelper
-     * @param \SM\XRetail\Model\OutletRepository $outletRepository
+     * @param \Magento\Customer\Api\GroupManagementInterface     $customerGroupManagement
+     * @param \Magento\Customer\Api\CustomerRepositoryInterface  $customerRepository
+     * @param \SM\Customer\Repositories\CustomerManagement       $customerManagement
+     * @param \Magento\Store\Model\StoreManagerInterface         $storeManager
+     * @param \Magento\Customer\Helper\Address                   $customerAddressHelper
+     * @param \SM\XRetail\Model\OutletRepository                 $outletRepository
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
@@ -74,11 +74,11 @@ class Customer extends AbstractSetting implements SettingInterface
         Address $customerAddressHelper,
         \SM\XRetail\Model\OutletRepository $outletRepository
     ) {
-        $this->storeManager            = $storeManager;
-        $this->customerManagement      = $customerManagement;
+        $this->storeManager = $storeManager;
+        $this->customerManagement = $customerManagement;
         $this->customerGroupManagement = $customerGroupManagement;
-        $this->customerRepository      = $customerRepository;
-        $this->customerAddressHelper   = $customerAddressHelper;
+        $this->customerRepository = $customerRepository;
+        $this->customerAddressHelper = $customerAddressHelper;
         parent::__construct($scopeConfig);
         $this->outletRepository = $outletRepository;
     }
@@ -90,7 +90,7 @@ class Customer extends AbstractSetting implements SettingInterface
     public function build()
     {
         // TODO: Implement build() method.
-        $defaultCustomerId   = $this->getDefaultCustomerId();
+        $defaultCustomerId = $this->getDefaultCustomerId();
         $loadDefaultCustomer = $this->customerManagement->loadCustomers(
             new DataObject(['entity_id' => $defaultCustomerId, 'storeId' => $this->getStore()])
         );
@@ -105,12 +105,12 @@ class Customer extends AbstractSetting implements SettingInterface
 
         return [
             'default_customer_tax_class'       => $this->customerGroupManagement->getDefaultGroup($this->getStore())
-                                                                                ->getTaxClassId(),
+                ->getTaxClassId(),
             'not_logged_In_customer_tax_class' => $this->customerGroupManagement->getNotLoggedInGroup()
-                                                                                ->getTaxClassId(),
+                ->getTaxClassId(),
             'default_customer_id'              => $defaultCustomerId,
             'default_customer'                 => $defaultCustomer,
-            'street_lines'                     => $this->customerAddressHelper->getStreetLines($this->getStore())
+            'street_lines'                     => $this->customerAddressHelper->getStreetLines($this->getStore()),
         ];
     }
 
@@ -121,12 +121,11 @@ class Customer extends AbstractSetting implements SettingInterface
      */
     private function getDefaultCustomerId()
     {
-        
         if (!$this->getOutletId()) {
-            $defaultGuestCustomerEmail =  \SM\Customer\Helper\Data::DEFAULT_CUSTOMER_RETAIL_EMAIL;
+            $defaultGuestCustomerEmail = \SM\Customer\Helper\Data::DEFAULT_CUSTOMER_RETAIL_EMAIL;
         } else {
             $outlet = $this->outletRepository->getById($this->getOutletId());
-            $defaultGuestCustomerEmail = $outlet->getData('default_guest_customer_email');
+            $defaultGuestCustomerEmail = $outlet->getData('default_guest_customer_email') ?? \SM\Customer\Helper\Data::DEFAULT_CUSTOMER_RETAIL_EMAIL;
         }
 
         try {
