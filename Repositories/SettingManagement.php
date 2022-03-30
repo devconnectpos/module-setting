@@ -239,10 +239,18 @@ class SettingManagement extends ServiceAbstract
         }
         //FIX XRT :549 updateRefundToGCProduct custom sales tax class
         if (isset($configData['xretail/pos/custom_sale_tax_class'])) {
-            $customerSales = $this->customSaleHelper->getCustomSaleProduct();
-            $customerSales->setStoreId(0);
-            $customerSales->setData('tax_class_id', $configData['xretail/pos/custom_sale_tax_class']);
-            $customerSales->save();
+            $customSales = $this->customSaleHelper->getCustomSaleProduct();
+            $customSales->setStoreId(0);
+            $customSales->setData('tax_class_id', $configData['xretail/pos/custom_sale_tax_class']);
+
+            try {
+                $customSales->save();
+            } catch (\Exception $e) {
+                $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                $logger = $objectManager->get('Psr\Log\LoggerInterface');
+                $logger->critical("====> [CPOS] Failed to update custom sales when saving settings: {$e->getMessage()}");
+                $logger->critical($e->getTraceAsString());
+            }
         }
         if (isset($configData['xretail/pos/integrate_gc'])
             && $this->integrateHelperData->isAHWGiftCardExist()) {
@@ -331,7 +339,7 @@ class SettingManagement extends ServiceAbstract
                 }
             }
         }
-        
+
         //check saving order comment integration setting
 	    if (isset($configData['xretail/pos/integrate_order_comment_extensions'])) {
 		    if ($configData['xretail/pos/integrate_order_comment_extensions'] === 'boldCommerce'

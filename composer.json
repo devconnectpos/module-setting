@@ -2,7 +2,7 @@
 	"name": "connectpos/module-setting",
 	"description": "N/A",
 	"type": "magento2-module",
-  "version": "21.11.29",
+  "version": "22.03.30",
 	"license": [
 		"proprietary"
 	],
