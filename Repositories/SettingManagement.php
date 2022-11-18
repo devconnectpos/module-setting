@@ -362,7 +362,7 @@ class SettingManagement extends ServiceAbstract
 
     protected function convertValue($value)
     {
-        if (!is_array($value)) {
+        if (!is_array($value) && !is_null($value)) {
             $result = json_decode($value);
             if (json_last_error()) {
                 $result = $value;
