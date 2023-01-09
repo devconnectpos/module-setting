@@ -192,7 +192,7 @@ class SettingManagement extends ServiceAbstract
             $config     = [];
             $configData = $this->configLoader->getConfigByPath('xretail/pos', 'default', 0);
             foreach ($configData as $configDatum) {
-                $config[$configDatum['path']] = $this->convertValue($configDatum['value']);
+                $config[$configDatum['path']] = $this->convertValue((string)$configDatum['value']);
             }
 
             $config["productAttributes"] = $this->productHelper->getProductAttributes();
@@ -363,7 +363,7 @@ class SettingManagement extends ServiceAbstract
     protected function convertValue($value)
     {
         if (!is_array($value) && !is_null($value)) {
-            $result = json_decode($value);
+            $result = json_decode((string)$value);
             if (json_last_error()) {
                 $result = $value;
             }
